@@ -11,6 +11,7 @@ public class HardwareDTBot {
 	protected MultipleTelemetry telemetry;
 
 	protected DriveTrain5873 driveTrain;
+	protected Landervator landervator;
 	protected SensoryManagement sensoryManagement;
 
 	protected AutoPilot autoPilot;
