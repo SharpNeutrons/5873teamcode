@@ -2,11 +2,10 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @Config
 @Autonomous(name="Rotate")
-public class AutoDriveTesting extends LinearOpMode {
+public class AutoDriveTesting extends OpMode5873 {
 
 	HardwareDTBot robot = new HardwareDTBot();
 
@@ -16,6 +15,8 @@ public class AutoDriveTesting extends LinearOpMode {
 
 	@Override
 	public void runOpMode() {
+		super.runOpMode();
+
 		robot.init(this);
 
 		waitForStart();

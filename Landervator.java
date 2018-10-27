@@ -4,17 +4,22 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 
 public class Landervator {
 
 	protected DcMotor extensionMotor;
 	protected DcMotor pitch;
+	protected Servo extensionLock;
 
 	private OpMode5873 opMode;
 	private MultipleTelemetry telemetry;
 
+	//TODO get real values for all of these
 	protected final int MAX_EXTENDED_COUNTS = 10000;
 	protected final int MAX_PITCH_COUNTS = 10000;
+	protected final double EXT_LOCK_OPENED = 0.5;
+	protected final double EXT_LOCK_CLOSED = 0.6;
 
 	protected Landervator () {};
 
@@ -33,6 +38,9 @@ public class Landervator {
 
 		extensionMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 		pitch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+		extensionLock = hwm.get(Servo.class, "extensionLock");
+		extensionLock.setPosition(EXT_LOCK_CLOSED);
 	}
 
 	protected void teleOpControl (Gamepad gp1, Gamepad gp2) {
@@ -57,6 +65,14 @@ public class Landervator {
 			}else if (gp2.dpad_down) {
 				pitchToPos(0);
 			}
+		}
+
+		if (extensionMotor.getPower() == 0 && gp2.b) {
+			extensionLock.setPosition(EXT_LOCK_CLOSED);
+		}
+
+		if (gp2.x) {
+			extensionLock.setPosition(EXT_LOCK_OPENED);
 		}
 
 		telemetry.addData("Landervator Pos", extensionMotor.getCurrentPosition());

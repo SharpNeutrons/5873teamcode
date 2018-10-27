@@ -11,7 +11,7 @@ public class TeleOp5873 extends OpMode5873 {
 
 	@Override
 	public void runOpMode() {
-		super();
+		super.runOpMode();
 
 		gp1Mode = Gamepad1Mode.DRIVE;
 
@@ -29,20 +29,14 @@ public class TeleOp5873 extends OpMode5873 {
 	private void teleopLoop() {
 
 		robot.driveTrain.teleOpSteeringStyle(gamepad1);
+		robot.landervator.teleOpControl(gamepad1, gamepad2);
 
-		if (gamepad1.left_bumper) {
-			//move silver cart to scoring, gold cart to loading
-		}else if (gamepad1.right_bumper) {
-			//move gold cart to scoring, silver cart to loading
-		}
-
-		if (gamepad1.dpad_up) {
-			//fold up the collector and elevator
-		}else if (gamepad1.dpad_down) {
-			//unfold the collector and elevator
-		}
-
-		//joystick control of the elevator
+		//TODO add this stuff to either landervator or new class
+//		if (gamepad1.left_bumper) {
+//			//move silver cart to scoring, gold cart to loading
+//		}else if (gamepad1.right_bumper) {
+//			//move gold cart to scoring, silver cart to loading
+//		}
 
 		robot.telemetry.update();
 		idle();

@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class HardwareDTBot {
@@ -18,14 +17,11 @@ public class HardwareDTBot {
 
 
 	/*Begin Motor Declaration*/
-//	protected DcMotor elevatorExtension;
 //	protected DcMotor linearExtension;
-//	protected DcMotor unfoldMotor;
 //	protected DcMotor cartMotor;
 //	protected DcMotor intakeMotor;
 //
 //	/*Begin Servo Declaration*/
-//	protected Servo lazySuzan;
 //	protected Servo intakeTwist;
 	//Todo decide on other servos, such as ones to move from queue to cart
 
@@ -41,7 +37,7 @@ public class HardwareDTBot {
 
 	}
 
-	protected void init (LinearOpMode opMode) {
+	protected void init (OpMode5873 opMode) {
 		hwMap = opMode.hardwareMap;
 
 		dashboard = FtcDashboard.getInstance();
@@ -49,6 +45,10 @@ public class HardwareDTBot {
 
 		driveTrain = new DriveTrain5873();
 		driveTrain.init(opMode, hwMap, telemetry);
+
+		landervator = new Landervator();
+		landervator.init(opMode, hwMap, telemetry);
+
 		//sensoryManagement = new SensoryManagement();
 		//sensoryManagement.init(opMode, hwMap);
 
