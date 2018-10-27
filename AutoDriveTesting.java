@@ -21,8 +21,8 @@ public class AutoDriveTesting extends OpMode5873 {
 
 		waitForStart();
 
-		robot.driveTrain.rotateByEncoders(degrees, speed, timeout);
-		//robot.driveTrain.driveEncoderDistance(914.4, 0.5, 5000);
+		robot.rotateDegrees(degrees, speed, timeout);
+		//robot.driveDistance(914.4, 0.5, 5000);
 	}
 
 }

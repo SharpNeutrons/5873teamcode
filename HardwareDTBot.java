@@ -9,11 +9,11 @@ public class HardwareDTBot {
 	protected FtcDashboard dashboard;
 	protected MultipleTelemetry telemetry;
 
-	protected DriveTrain5873 driveTrain;
-	protected Landervator landervator;
-	protected SensoryManagement sensoryManagement;
+	private DriveTrain5873 driveTrain;
+	private Landervator landervator;
+	private SensoryManagement sensoryManagement;
 
-	protected AutoPilot autoPilot;
+	private AutoPilot autoPilot;
 
 
 	/*Begin Motor Declaration*/
@@ -52,42 +52,53 @@ public class HardwareDTBot {
 		//sensoryManagement = new SensoryManagement();
 		//sensoryManagement.init(opMode, hwMap);
 
-		/*Begin Motor Setting*/
 
-//		elevatorExtension	= hwMap.get(DcMotor.class, "elevatorExtension");
-//		linearExtension		= hwMap.get(DcMotor.class, "linearExtension");
-//		unfoldMotor			= hwMap.get(DcMotor.class, "unfoldMotor");
-//		cartMotor			= hwMap.get(DcMotor.class, "cartMotor");
-//		intakeMotor			= hwMap.get(DcMotor.class, "intakeMotor");
-//
-//		/*Begin Servo Setting*/
-//		lazySuzan 	= hwMap.get(Servo.class, "lazySuzan");
-//		intakeTwist	= hwMap.get(Servo.class, "intakeTwist");
+		//autoPilot.init(driveTrain, sensoryManagement);
+	}
 
-		/*Begin Sensor Setting*/
+	protected void drive (double left, double right) {
+		this.driveTrain.leftDrive.setPower(left);
+		this.driveTrain.rightDrive.setPower(right);
+	}
 
-		/*Begin Motor Info*/
+	protected void driveDistance (double distance, double speed, double timeout) {
+		this.driveTrain.driveEncoderDistance(distance, speed, timeout);
+	}
 
-//		elevatorExtension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//		linearExtension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//		unfoldMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//		cartMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//		intakeMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+	protected void rotateDegrees (double degrees, double speed, double timeout) {
+		this.driveTrain.rotateByEncoders(degrees, speed, timeout);
+	}
 
+	protected void setLandervatorExtensionSpeed(double speed) {
+		landervator.setExtensionSpeed(speed);
+	}
 
-//		elevatorExtension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//		linearExtension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//		unfoldMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//		cartMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//		intakeMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//
-//		elevatorExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//		linearExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//		unfoldMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//		cartMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//		intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//
-//		autoPilot.init(driveTrain, sensoryManagement);
+	protected void setLandervatorPitchSpeed(double speed) {
+		landervator.setPitchSpeed(speed);
+	}
+
+	protected void setLandervatorExtensionPos(int pos) {
+		landervator.extendToPos(pos);
+	}
+
+	protected void setLandervatorPitchPos(int pos) {
+		landervator.pitchToPos(pos);
+	}
+
+	protected void unlockLandervator () {
+		landervator.moveLock(Landervator.LOCK_POS.OPENED);
+	}
+
+	protected void lockLandervator () {
+		landervator.moveLock(Landervator.LOCK_POS.LOCKED);
+	}
+
+	protected void updateTelemetry () {
+		this.telemetry.update();
+	}
+
+	protected void loop () {
+		landervator.runEncoderLoop();
 	}
 
 }

@@ -2,24 +2,29 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Landervator {
 
 	protected DcMotor extensionMotor;
-	protected DcMotor pitch;
+	protected DcMotor pitchMotor;
 	protected Servo extensionLock;
+
+	private boolean extensionLocked = true;
 
 	private OpMode5873 opMode;
 	private MultipleTelemetry telemetry;
+
+	protected enum LOCK_POS {OPENED, LOCKED}
 
 	//TODO get real values for all of these
 	protected final int MAX_EXTENDED_COUNTS = 10000;
 	protected final int MAX_PITCH_COUNTS = 10000;
 	protected final double EXT_LOCK_OPENED = 0.5;
 	protected final double EXT_LOCK_CLOSED = 0.6;
+	protected final int MIN_LATCH_COUNTS = 5000;
+	protected final int MIN_UNLATCH_COUNTS = 8000;
 
 	protected Landervator () {};
 
@@ -28,75 +33,72 @@ public class Landervator {
 		telemetry = _t;
 
 		extensionMotor = hwm.get(DcMotor.class, "landerExtension");
-		pitch = hwm.get(DcMotor.class, "landerPitch");
+		pitchMotor = hwm.get(DcMotor.class, "landerPitch");
 
 		extensionMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-		pitch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+		pitchMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
 		extensionMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-		pitch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+		pitchMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 		extensionMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-		pitch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+		pitchMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 		extensionLock = hwm.get(Servo.class, "extensionLock");
 		extensionLock.setPosition(EXT_LOCK_CLOSED);
 	}
 
-	protected void teleOpControl (Gamepad gp1, Gamepad gp2) {
+	protected void setExtensionSpeed (double speed) {
 		if (extensionMotor.getMode().equals(DcMotor.RunMode.RUN_USING_ENCODER) &&
 				extensionMotor.getCurrentPosition() < MAX_EXTENDED_COUNTS) {
-			double extensionControl = Math.pow(-gp2.left_stick_y, 2);
-			extensionMotor.setPower(extensionControl);
-			if (gp2.dpad_up) {
-				extendToPos(0/*TODO get full extension pos*/);
-			}else if (gp2.dpad_down) {
-				extendToPos(0);
-			}
+			extensionMotor.setPower(speed);
 		}
-		if (pitch.getMode().equals(DcMotor.RunMode.RUN_USING_ENCODER) &&
-				pitch.getCurrentPosition() < MAX_PITCH_COUNTS) {
-			double pitchControl = Math.pow(-gp2.right_stick_y, 2) / 3;
-			pitch.setPower(pitchControl);
-			/*TODO when cratervator is made, look for something to move
-				TODO it out of the way as this pitches up*/
-			if (gp2.dpad_up) {
-				pitchToPos(0/*TODO get full pitch pos*/);
-			}else if (gp2.dpad_down) {
-				pitchToPos(0);
-			}
-		}
-
-		if (extensionMotor.getPower() == 0 && gp2.b) {
-			extensionLock.setPosition(EXT_LOCK_CLOSED);
-		}
-
-		if (gp2.x) {
-			extensionLock.setPosition(EXT_LOCK_OPENED);
-		}
-
-		telemetry.addData("Landervator Pos", extensionMotor.getCurrentPosition());
-		telemetry.addData("Landerator pitch", pitch.getCurrentPosition());
-
-		encoderLoop(extensionMotor);
-		encoderLoop(pitch);
-
 		testMotorLimit(extensionMotor, MAX_EXTENDED_COUNTS);
-		testMotorLimit(pitch, MAX_PITCH_COUNTS);
+		telemetry.addData("Landervator Pos", extensionMotor.getCurrentPosition());
 	}
 
-	private void extendToPos (int pos) {
+	protected void setPitchSpeed (double speed) {
+		if (pitchMotor.getMode().equals(DcMotor.RunMode.RUN_USING_ENCODER) &&
+				pitchMotor.getCurrentPosition() < MAX_PITCH_COUNTS) {
+			pitchMotor.setPower(speed);
+			/*TODO when cratervator is made, look for something to move
+				TODO it out of the way as this pitches up*/
+		}
+		testMotorLimit(pitchMotor, MAX_PITCH_COUNTS);
+		telemetry.addData("Landervator pitchMotor", pitchMotor.getCurrentPosition());
+	}
+
+	protected void runEncoderLoop () {
+		encoderLoop(extensionMotor);
+		encoderLoop(pitchMotor);
+	}
+
+	protected void extendToPos (int pos) {
 		double speed = 0.5;
 		extensionMotor.setTargetPosition(pos);
 		extensionMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 		extensionMotor.setPower(speed);
 	}
 
-	private void pitchToPos (int pos) {
+	protected void pitchToPos (int pos) {
 		double speed = 0.25;
-		pitch.setTargetPosition(pos);
-		pitch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-		pitch.setPower(speed);
+		pitchMotor.setTargetPosition(pos);
+		pitchMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+		pitchMotor.setPower(speed);
+	}
+
+	protected void moveLock (LOCK_POS pos) {
+		if (pos.equals(LOCK_POS.LOCKED)) {
+			if (extensionMotor.getPower() == 0 && !extensionMotor.isBusy()) {
+				extensionLock.setPosition(EXT_LOCK_CLOSED);
+				extensionLocked = true;
+			}
+		}else if (pos.equals(LOCK_POS.OPENED)) {
+			if (extensionMotor.getPower() == 0 && !extensionMotor.isBusy()) {
+				extensionLock.setPosition(EXT_LOCK_OPENED);
+				extensionLocked = false;
+			}
+		}
 	}
 
 	private void encoderLoop (DcMotor motor) {
@@ -107,7 +109,7 @@ public class Landervator {
 	}
 
 	private void testMotorLimit (DcMotor motor, int limit) {
-		if (motor.getCurrentPosition() > limit) {
+		if (motor.getCurrentPosition() > limit || extensionLocked) {
 			motor.setPower(0);
 			motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 		}

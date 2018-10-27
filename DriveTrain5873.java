@@ -4,10 +4,8 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 public class DriveTrain5873 {
 
@@ -45,25 +43,6 @@ public class DriveTrain5873 {
 
 		leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 		rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-	}
-
-	protected void teleOpTankStyle (Gamepad control) {
-		double driveLeftPower = -control.left_stick_y;
-		double driveRightPower = -control.right_stick_y;
-		leftDrive.setPower(driveLeftPower);
-		rightDrive.setPower(driveRightPower);
-	}
-
-	protected void teleOpSteeringStyle (Gamepad control) {
-		double left;
-		double right;
-		double drive = -control.left_stick_y;
-		double steer = control.right_stick_x;
-		left    = Range.clip(drive + steer, -1.0, 1.0) ;
-		right   = Range.clip(drive - steer, -1.0, 1.0) ;
-
-		leftDrive.setPower(left);
-		rightDrive.setPower(right);
 	}
 
 	protected void setLeftRightPower (double power) {
@@ -122,7 +101,7 @@ public class DriveTrain5873 {
 	 * @param speed the speed at which the two motors should move
 	 * @param timeout how long the motors should be given to move, in ms
 	 */
-	protected void moveMotorEncodersToTargets (int leftTarget, int rightTarget, double speed, double timeout) {
+	private void moveMotorEncodersToTargets (int leftTarget, int rightTarget, double speed, double timeout) {
 		leftDrive.setTargetPosition(leftTarget);
 		rightDrive.setTargetPosition(rightTarget);
 
@@ -143,16 +122,21 @@ public class DriveTrain5873 {
 		//TODO start the loop to wait until the motor have reached their target positions
 		while(opMode.opModeIsActive() && runtime.milliseconds() < timeout &&
 				(leftDrive.isBusy() || rightDrive.isBusy())) {
-			telemetry.addData("left", leftDrive.getPower());
-			telemetry.addData("right", rightDrive.getPower());
-			telemetry.addData("left","%7d/%7d", leftDrive.getCurrentPosition(), leftTarget);
-			telemetry.addData("right", "%7d/%7d", rightDrive.getCurrentPosition(), rightTarget);
-			telemetry.update();
-			opMode.idle();
-
+			encoderLoop(leftTarget, rightTarget);
 		}
-		telemetry.addLine("movement complete");
+
 		setLeftRightPower(0);
 		setLeftRightMode(DcMotor.RunMode.RUN_USING_ENCODER);
+		telemetry.addLine("movement complete");
+
+	}
+
+	private void encoderLoop (double leftTarget, double rightTarget) {
+		telemetry.addData("left", leftDrive.getPower());
+		telemetry.addData("right", rightDrive.getPower());
+		telemetry.addData("left","%7d/%7d", leftDrive.getCurrentPosition(), leftTarget);
+		telemetry.addData("right", "%7d/%7d", rightDrive.getCurrentPosition(), rightTarget);
+		telemetry.update();
+		opMode.idle();
 	}
 }
