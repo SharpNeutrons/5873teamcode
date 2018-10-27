@@ -1,16 +1,19 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name="DT unfortunate rule changes")
-public class TeleOp5873 extends LinearOpMode {
+public class TeleOp5873 extends OpMode5873 {
 
-	HardwareDTBot robot = new HardwareDTBot();
+	public TeleOp5873 () {
+		super();
+	}
 
 	@Override
 	public void runOpMode() {
-		robot.init(this);
+		super();
+
+		gp1Mode = Gamepad1Mode.DRIVE;
 
 		waitForStart();
 
