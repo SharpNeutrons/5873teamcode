@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name="DT unfortunate rule changes")
+@TeleOp(name="5873 TeleOp", group="DT")
 public class TeleOp5873 extends OpMode5873 {
 
 	public TeleOp5873 () {
@@ -28,8 +28,6 @@ public class TeleOp5873 extends OpMode5873 {
 
 	private void teleopLoop() {
 
-		//robot.driveTrain.teleOpSteeringStyle(gamepad1);
-		//robot.landervator.teleOpControl(gamepad1, gamepad2);
 		this.drive();
 		this.controlLandervator();
 

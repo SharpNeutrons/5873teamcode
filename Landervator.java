@@ -13,6 +13,8 @@ public class Landervator {
 
 	private boolean extensionLocked = true;
 
+	protected boolean encoderMovementActive = false;
+
 	private OpMode5873 opMode;
 	private MultipleTelemetry telemetry;
 
@@ -48,43 +50,12 @@ public class Landervator {
 		extensionLock.setPosition(EXT_LOCK_CLOSED);
 	}
 
-	protected void setExtensionSpeed (double speed) {
-		if (extensionMotor.getMode().equals(DcMotor.RunMode.RUN_USING_ENCODER) &&
-				extensionMotor.getCurrentPosition() < MAX_EXTENDED_COUNTS) {
-			extensionMotor.setPower(speed);
-		}
-		testMotorLimit(extensionMotor, MAX_EXTENDED_COUNTS);
-		telemetry.addData("Landervator Pos", extensionMotor.getCurrentPosition());
-	}
-
-	protected void setPitchSpeed (double speed) {
-		if (pitchMotor.getMode().equals(DcMotor.RunMode.RUN_USING_ENCODER) &&
-				pitchMotor.getCurrentPosition() < MAX_PITCH_COUNTS) {
-			pitchMotor.setPower(speed);
-			/*TODO when cratervator is made, look for something to move
-				TODO it out of the way as this pitches up*/
-		}
-		testMotorLimit(pitchMotor, MAX_PITCH_COUNTS);
-		telemetry.addData("Landervator pitchMotor", pitchMotor.getCurrentPosition());
-	}
-
-	protected void runEncoderLoop () {
-		encoderLoop(extensionMotor);
-		encoderLoop(pitchMotor);
-	}
-
-	protected void extendToPos (int pos) {
-		double speed = 0.5;
-		extensionMotor.setTargetPosition(pos);
-		extensionMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-		extensionMotor.setPower(speed);
-	}
-
-	protected void pitchToPos (int pos) {
-		double speed = 0.25;
-		pitchMotor.setTargetPosition(pos);
-		pitchMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-		pitchMotor.setPower(speed);
+	/**
+	 * Tests if the motors should keep running to their target positions, and turns them off if they shouldn't
+	 */
+	protected boolean runEncoderLoop () {
+		encoderMovementActive = encoderLoop(extensionMotor) && encoderLoop(pitchMotor);
+		return encoderMovementActive;
 	}
 
 	protected void moveLock (LOCK_POS pos) {
@@ -101,14 +72,17 @@ public class Landervator {
 		}
 	}
 
-	private void encoderLoop (DcMotor motor) {
+	private boolean encoderLoop (DcMotor motor) {
 		if (!opMode.opModeIsActive() || !motor.isBusy()) {
 			motor.setPower(0);
 			motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+			return false;
+		}else {
+			return true;
 		}
 	}
 
-	private void testMotorLimit (DcMotor motor, int limit) {
+	protected void testMotorLimit (DcMotor motor, int limit) {
 		if (motor.getCurrentPosition() > limit || extensionLocked) {
 			motor.setPower(0);
 			motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
